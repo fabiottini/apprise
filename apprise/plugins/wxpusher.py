@@ -83,13 +83,13 @@ class NotifyWxPusher(NotifyBase):
     service_url = 'https://wxpusher.zjiecode.com/'
 
     # The default protocol
-    secure_protocol = 'wxpusher'
+    protocol = 'wxpusher'
 
     # A URL that takes you to the setup/help of the specific protocol
     setup_url = 'https://github.com/caronc/apprise/wiki/Notify_wxpusher'
 
     # WxPusher notification endpoint
-    notify_url = 'https://wxpusher.zjiecode.com/api/send/message'
+    notify_url = 'http://wxpusher.zjiecode.com/api/send/message'
 
     # Define object templates
     templates = (
@@ -292,7 +292,7 @@ class NotifyWxPusher(NotifyBase):
         params = self.url_parameters(privacy=privacy, *args, **kwargs)
 
         return '{schema}://{token}/{targets}/?{params}'.format(
-            schema=self.secure_protocol,
+            schema=self.protocol,
             token=self.pprint(
                 self.token, privacy, mode=PrivacyMode.Secret, safe=''),
             targets='/'.join(chain(

@@ -235,7 +235,7 @@ def test_plugin_wxpusher_edge_cases(mock_post):
     assert mock_post.call_count == 1
 
     details = mock_post.call_args_list[0]
-    assert details[0][0] == 'https://wxpusher.zjiecode.com/api/send/message'
+    assert details[0][0] == 'http://wxpusher.zjiecode.com/api/send/message'
     payload = loads(details[1]['data'])
     assert payload == {
         'appToken': 'AT_appid',
@@ -245,7 +245,6 @@ def test_plugin_wxpusher_edge_cases(mock_post):
         'topicIds': [],
         'uids': ['UID_abcd'],
         'verifyPay': False,
-        'verifyPayType': 0,
         'url': None,
     }
 
@@ -282,7 +281,7 @@ def test_plugin_wxpusher_result_set(mock_post):
     assert mock_post.call_count == 1
 
     details = mock_post.call_args_list[0]
-    assert details[0][0] == 'https://wxpusher.zjiecode.com/api/send/message'
+    assert details[0][0] == 'http://wxpusher.zjiecode.com/api/send/message'
     payload = loads(details[1]['data'])
     assert payload == {
         'appToken': 'AT_appid',
@@ -292,7 +291,6 @@ def test_plugin_wxpusher_result_set(mock_post):
         'topicIds': [123],
         'uids': ['UID_456'],
         'verifyPay': False,
-        'verifyPayType': 0,
         'url': None,
     }
 
@@ -313,7 +311,7 @@ def test_plugin_wxpusher_result_set(mock_post):
     assert mock_post.call_count == 1
 
     details = mock_post.call_args_list[0]
-    assert details[0][0] == 'https://wxpusher.zjiecode.com/api/send/message'
+    assert details[0][0] == 'http://wxpusher.zjiecode.com/api/send/message'
     payload = loads(details[1]['data'])
 
     assert payload == {
@@ -324,7 +322,6 @@ def test_plugin_wxpusher_result_set(mock_post):
         'topicIds': [123456789],
         'uids': ['UID_123', 'UID_abc'],
         'verifyPay': False,
-        'verifyPayType': 0,
         'url': None,
     }
 
