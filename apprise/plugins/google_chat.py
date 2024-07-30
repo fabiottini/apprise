@@ -200,9 +200,28 @@ class NotifyGoogleChat(NotifyBase):
         }
 
         payload = {
-            # Our Message
-            'text': body,
+            "textParagraph": {
+                # Our Message
+                "text": body
+            }
         }
+
+        if not "subtitle" in kwargs or len(kwargs["subtitle"])==0:
+            cart_header = {
+                "title": title
+            }
+        else:
+            cart_header = {
+                "title": title, 
+                "subtitle": kwargs["subtitle"]
+            }
+
+        full_message = [
+            {
+                "header": cart_header,
+                "sections": [{"widgets": [widget]}],
+            },
+        ]
 
         # Construct Notify URL
         notify_url = self.notify_url.format(
@@ -230,7 +249,7 @@ class NotifyGoogleChat(NotifyBase):
             r = requests.post(
                 notify_url,
                 params=params,
-                data=dumps(payload),
+                json={"cards": full_message},
                 headers=headers,
                 verify=self.verify_certificate,
                 timeout=self.request_timeout,
