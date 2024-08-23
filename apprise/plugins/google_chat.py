@@ -219,7 +219,7 @@ class NotifyGoogleChat(NotifyBase):
         full_message = [
             {
                 "header": cart_header,
-                "sections": [{"widgets": [widget]}],
+                "sections": [{"widgets": [payload]}],
             },
         ]
 

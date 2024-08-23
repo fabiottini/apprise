@@ -39,3 +39,7 @@ The contributors have been listed in chronological order:
 
 * Toni Wells <@isometimescode>
   * May 2024 - Fixed token length with apprise://
+
+* Fabio Lucattini <@fabiottini>
+  * Jul 2024 - fix: conversion html_to_text hr tags rstrip non string object
+  * Aug 2024 - feat: html on google chat plugin
