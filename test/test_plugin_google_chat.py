@@ -32,7 +32,7 @@ from apprise import Apprise
 from apprise.plugins.google_chat import NotifyGoogleChat
 from helpers import AppriseURLTester
 from unittest import mock
-from apprise import NotifyType
+from apprise import NotifyType, NotifyFormat
 from json import loads
 
 # Disable logging for a cleaner testing output
@@ -160,7 +160,7 @@ def test_plugin_google_chat_general(mock_post):
     assert obj.notify(
         body="test body", title='title',
         notify_type=NotifyType.INFO) is True
-
+    
     # Test our call count
     assert mock_post.call_count == 1
     assert mock_post.call_args_list[0][0][0] == \
@@ -172,6 +172,28 @@ def test_plugin_google_chat_general(mock_post):
     payload = loads(mock_post.call_args_list[0][1]['data'])
     assert payload['text'] == "title\r\ntest body"
 
+    mock_post.reset_mock()
+
+    # Test our messaging with the threadKey WITH HTML MESSAGE
+    obj = Apprise.instantiate(
+        'gchat://{}/{}/{}/{}'.format(workspace, key, token, threadkey))
+    assert isinstance(obj, NotifyGoogleChat)
+    assert obj.notify(
+        body="<b>test body</b>", title='title',
+        message_type=NotifyFormat.HTML,
+        subtitle="test subtitle",
+        notify_type=NotifyType.INFO) is True
+    
+    # Test our call count HTML message
+    assert mock_post.call_count == 1
+    assert mock_post.call_args_list[0][0][0] == \
+        'https://chat.googleapis.com/v1/spaces/ws/messages'
+    params = mock_post.call_args_list[0][1]['params']
+    assert params.get('token') == token
+    assert params.get('key') == key
+    assert params.get('threadKey') == threadkey
+    payload = mock_post.call_args_list[0][1]['json']['cards'][0]['sections'][0]['widgets'][0]['textParagraph']
+    assert payload['text'] == 'title\r\n<b>test body</b>'
 
 def test_plugin_google_chat_edge_case():
     """
@@ -180,3 +202,6 @@ def test_plugin_google_chat_edge_case():
     """
     with pytest.raises(TypeError):
         NotifyGoogleChat('workspace', 'webhook', 'token', thread_key=object())
+
+
+    

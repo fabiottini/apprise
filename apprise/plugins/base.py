@@ -468,6 +468,18 @@ class NotifyBase(URLBase):
         # Handle situations where the title is None
         title = '' if not title else title
 
+        # Handle subtitle if managed by plugin
+        if "subtitle" not in kwargs or not isinstance(kwargs["subtitle"], str):
+            subtitle = ''
+        else:
+            subtitle = kwargs["subtitle"]
+
+        # Handle message type to manage also more types in different plugins
+        if "message_type" not in kwargs or not isinstance(kwargs["message_type"], str):
+            message_type = NotifyFormat.TEXT
+        else:
+            message_type = kwargs["message_type"]
+
         # Truncate flag set with attachments ensures that only 1
         # attachment passes through. In the event there could be many
         # services specified, we only want to do this logic once.
@@ -490,7 +502,8 @@ class NotifyBase(URLBase):
             yield dict(
                 body=chunk['body'], title=chunk['title'],
                 notify_type=notify_type, attach=_attach,
-                body_format=body_format
+                body_format=body_format,
+                subtitle=subtitle,message_type=message_type
             )
 
     def _apply_overflow(self, body, title=None, overflow=None,

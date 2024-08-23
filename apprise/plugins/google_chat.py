@@ -189,39 +189,53 @@ class NotifyGoogleChat(NotifyBase):
         return
 
     def send(self, body, title='', notify_type=NotifyType.INFO, **kwargs):
+        self.send(body=body, title=title, subtitle=None, notify_type=notify_type, message_type=NotifyFormat.TEXT, kwargs=kwargs)
+
+
+    def send(self, body, title='', subtitle='', notify_type=NotifyType.INFO, message_type=NotifyFormat.TEXT, **kwargs):
         """
         Perform Google Chat Notification
         """
-
+        message_type_authorized = [NotifyFormat.TEXT,NotifyFormat.HTML]
+        
         # Our headers
         headers = {
             'User-Agent': self.app_id,
             'Content-Type': 'application/json; charset=utf-8',
         }
 
-        payload = {
-            "textParagraph": {
-                # Our Message
-                "text": body
-            }
+        payload={
+            # Our Message
+            "text": body
         }
 
-        if not "subtitle" in kwargs or len(kwargs["subtitle"])==0:
-            cart_header = {
-                "title": title
-            }
-        else:
-            cart_header = {
-                "title": title, 
-                "subtitle": kwargs["subtitle"]
+        self.logger.debug("message_type: %s" % message_type_authorized)
+
+        if not message_type or message_type not in message_type_authorized:
+            message_type = NotifyFormat.TEXT
+
+        # Starting from the work done in this repo: https://gist.github.com/gh640/4df1cf28bf2e1b8544487213e3fbd4fe modify the message to enable the HTML messages
+        if message_type == NotifyFormat.HTML:
+            payload_html = {
+                "textParagraph": payload
             }
 
-        full_message = [
-            {
-                "header": cart_header,
-                "sections": [{"widgets": [payload]}],
-            },
-        ]
+            if not subtitle or len(subtitle)==0:
+                cart_header = {
+                    "title": title
+                }
+            else:
+                cart_header = {
+                    "title": title, 
+                    "subtitle": subtitle
+                }
+
+            full_message = [
+                {
+                    "header": cart_header,
+                    "sections": [{"widgets": [payload_html]}],
+                },
+            ]
 
         # Construct Notify URL
         notify_url = self.notify_url.format(
@@ -241,19 +255,34 @@ class NotifyGoogleChat(NotifyBase):
             notify_url, self.verify_certificate,
         ))
         self.logger.debug('Google Chat Parameters: %s' % str(params))
-        self.logger.debug('Google Chat Payload: %s' % str(payload))
+
+        if message_type == NotifyFormat.HTML:
+            self.logger.debug('Google Chat Payload: %s' % str(payload_html))
+        else:
+            self.logger.debug('Google Chat Payload: %s' % str(payload))
 
         # Always call throttle before any remote server i/o is made
         self.throttle()
         try:
-            r = requests.post(
-                notify_url,
-                params=params,
-                json={"cards": full_message},
-                headers=headers,
-                verify=self.verify_certificate,
-                timeout=self.request_timeout,
-            )
+            if message_type == NotifyFormat.HTML:
+                r = requests.post(
+                    notify_url,
+                    params=params,
+                    json={"cards": full_message},
+                    headers=headers,
+                    verify=self.verify_certificate,
+                    timeout=self.request_timeout,
+                )
+            else:
+                r = requests.post(
+                    notify_url,
+                    params=params,
+                    data=dumps(payload),
+                    headers=headers,
+                    verify=self.verify_certificate,
+                    timeout=self.request_timeout,
+                )
+            
             if r.status_code not in (
                     requests.codes.ok, requests.codes.no_content):
 
